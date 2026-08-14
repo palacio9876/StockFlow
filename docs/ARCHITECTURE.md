@@ -1466,3 +1466,24 @@ The architecture prioritizes:
 * Controlled complexity.
 
 The system will evolve based on real requirements rather than introducing infrastructure complexity prematurely.
+
+## Modular Monolith
+
+StockFlow utiliza una arquitectura Modular Monolith basada en NestJS.
+
+La aplicación se despliega como una única unidad, pero el código está organizado
+en módulos independientes orientados al dominio.
+
+Los módulos encapsulan sus responsabilidades y exponen únicamente las
+interfaces necesarias para comunicarse con otros módulos.
+
+La arquitectura busca mantener bajo acoplamiento y alta cohesión entre
+los módulos.
+
+### Module Structure
+
+src/
+├── modules/
+├── common/
+├── config/
+└── database/
