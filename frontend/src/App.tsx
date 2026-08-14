@@ -1,7 +1,13 @@
 export default function App() {
- return (
-   <div className="min-h-screen flex items-center justify-center bg-black text-white text-4xl font-bold">
-     Tailwind is working!
-   </div>
- )
+  return (
+    <main className="flex min-h-screen items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold">StockFlow</h1>
+
+        <p className="mt-2 text-gray-600">
+          Inventory Management Platform
+        </p>
+      </div>
+    </main>
+  );
 }
