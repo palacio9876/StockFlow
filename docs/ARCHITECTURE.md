@@ -1,132 +1,231 @@
-# StockFlow — Architecture
+<!-- markdownlint-disable MD024 -->
+# StockFlow — Arquitectura
 
-## 1. Architecture Overview
+## 1. Descripción general de la arquitectura
 
-StockFlow será construido como un **Modular Monolith** utilizando NestJS como framework backend y MySQL como sistema principal de persistencia.
+StockFlow utilizará una arquitectura **Modular Monolith** basada en NestJS.
 
-La arquitectura busca mantener una separación clara entre:
+La aplicación será desplegada inicialmente como una única unidad, pero estará
+organizada internamente en módulos orientados al dominio y a las
+responsabilidades del negocio.
 
-* Domain.
-* Application.
-* Infrastructure.
+Cada módulo tendrá una responsabilidad específica y deberá mantener límites
+claros con respecto a los demás módulos.
 
-El sistema será desplegado inicialmente como una única aplicación, pero sus módulos estarán desacoplados para permitir una futura evolución hacia servicios independientes si los requisitos del negocio lo justifican.
+La arquitectura combinará principios de:
 
-### Architecture Goals
+- Domain-Driven Design.
+- Clean Architecture.
+- Layered Architecture.
+- Modular Monolith.
+- Domain Events.
 
-* Mantener el dominio independiente de frameworks e infraestructura.
-* Separar responsabilidades entre módulos.
-* Facilitar pruebas unitarias e integración.
-* Evitar acoplamiento innecesario entre módulos.
-* Mantener las operaciones de inventario consistentes mediante transacciones.
-* Permitir crecimiento funcional sin convertir el sistema en un monolito difícil de mantener.
-* Facilitar futuras integraciones externas.
-* Mantener una arquitectura comprensible para un equipo de desarrollo empresarial.
+Estos principios se utilizarán de manera pragmática. No se implementarán
+patrones o estructuras únicamente por seguir una metodología, sino cuando
+aporten valor al proyecto.
+
+### Objetivos de la arquitectura
+
+- Mantener el dominio independiente de frameworks e infraestructura.
+- Separar responsabilidades entre módulos.
+- Mantener alta cohesión dentro de los módulos.
+- Reducir el acoplamiento entre módulos.
+- Facilitar pruebas unitarias, de integración y de extremo a extremo.
+- Mantener las operaciones críticas de inventario consistentes mediante
+  transacciones.
+- Evitar que los controladores contengan lógica de negocio.
+- Facilitar futuras integraciones externas.
+- Permitir crecimiento funcional sin convertir el sistema en un monolito
+  difícil de mantener.
+- Mantener una arquitectura comprensible para un equipo de desarrollo
+  empresarial.
+- Evitar introducir infraestructura innecesaria durante el MVP.
 
 ---
 
-# 2. Architectural Style
+## 2. Estilo arquitectónico
 
-StockFlow utilizará una combinación de:
+StockFlow será un **Modular Monolith**.
 
-* **Modular Monolith**
-* **Domain-Driven Design principles**
-* **Clean Architecture principles**
-* **Layered Architecture**
-* **Domain Events**
-
-La arquitectura no implementará una versión estricta de todos estos patrones. Se utilizarán únicamente los principios que aporten valor al proyecto.
-
-### High-Level Architecture
+Esto significa que la aplicación se desplegará como una única aplicación, pero
+estará dividida internamente en módulos independientes orientados al negocio.
 
 ```text
-                    Client
-                      │
-                      ▼
-                HTTP / REST API
-                      │
-                      ▼
+                    StockFlow
+                        │
+                Modular Monolith
+                        │
                 NestJS Application
-                      │
-          ┌───────────┴───────────┐
-          │                       │
-      Modules                 Cross-cutting
-          │                       │
-          ▼                       ▼
-   ┌───────────────┐       ┌───────────────┐
-   │   Identity    │       │ Authentication│
-   │ Organizations │       │ Authorization │
-   │    Catalog    │       │ Validation    │
-   │   Inventory   │       │ Error Handling│
-   │  Transfers    │       │ Logging       │
-   │  Purchasing   │       │ Configuration │
-   │    Alerts     │       └───────────────┘
-   │    Audit      │
-   │   Reporting   │
-   └───────────────┘
-          │
-          ▼
-      MySQL Database
+                        │
+        ┌───────────────┼────────────────┐
+        │               │                │
+      Modules       Cross-cutting     Configuration
+        │               │
+        │               ├── Common
+        │               ├── Database
+        │               └── Config
+        │
+        ├── Identity
+        ├── Organizations
+        ├── Catalog
+        ├── Inventory
+        ├── Transfers
+        ├── Purchasing
+        ├── Alerts
+        ├── Audit
+        └── Reporting
+                        │
+                        ▼
+                      MySQL
 ```
 
 ---
 
-# 3. Technology Stack
+## 3. Stack tecnológico
 
-## 3.1 Backend
+### 3.1 Backend
 
-| Technology        | Purpose              |
-| ----------------- | -------------------- |
-| Node.js           | Runtime              |
-| NestJS            | Backend framework    |
-| TypeScript        | Programming language |
-| REST API          | External API         |
-| MySQL             | Relational database  |
-| TypeORM           | ORM / persistence    |
-| JWT               | Authentication       |
-| class-validator   | Request validation   |
-| class-transformer | DTO transformation   |
+| Tecnología        | Propósito                 |
+| ----------------- | ------------------------- |
+| Node.js           | Tiempo de ejecución       |
+| NestJS            | Framework de backend      |
+| TypeScript        | Lenguaje de programación  |
+| REST API          | API externa               |
+| MySQL             | Base de datos relacional  |
+| TypeORM           | ORM / persistencia        |
+| JWT               | Autenticación             |
+| class-validator   | Validación de peticiones  |
+| class-transformer | Transformación de DTOs    |
+
+### 3.2 Frontend
+
+| Tecnología   | Propósito                |
+| ------------ | ------------------------ |
+| React        | Framework de frontend    |
+| TypeScript   | Lenguaje de programación |
+| Vite         | Herramienta de build     |
+| React Router | Enrutado en el cliente   |
+| Tailwind CSS | Estilos                  |
+| shadcn/ui    | Componentes de UI        |
+| Lucide       | Iconos                   |
+
+El frontend se comunicará con el backend a través de la API REST.
+
+```text
+React
+  │
+  │ HTTP / REST
+  ▼
+NestJS API
+```
+
+### 3.3 Herramientas de desarrollo
+
+Herramientas de desarrollo recomendadas:
+
+| Herramienta    | Propósito                    |
+| -------------- | ---------------------------- |
+| Git            | Control de versiones         |
+| GitHub         | Repositorio de código fuente |
+| Docker         | Infraestructura local        |
+| Docker Compose | Entorno local de MySQL       |
+| ESLint         | Análisis estático            |
+| Prettier       | Formato de código            |
+| Jest           | Pruebas unitarias            |
+| Supertest      | Pruebas de integración HTTP  |
+
+### 3.4 Infraestructura no utilizada inicialmente
+
+Las siguientes tecnologías se excluyen intencionalmente de la arquitectura
+inicial:
+
+- `Redis`.
+- `Kafka`.
+- `RabbitMQ`.
+- `Elasticsearch`.
+- `Kubernetes`.
+- Microservicios.
+
+Estas tecnologías podrían introducirse en versiones futuras si los requisitos
+técnicos reales justifican su uso.
+
+No son necesarias para el MVP.
 
 ---
 
-## 3.2 Development Tools
+## 4. Estructura del proyecto
 
-Recommended development tools:
-
-| Tool           | Purpose                  |
-| -------------- | ------------------------ |
-| Git            | Version control          |
-| GitHub         | Source code repository   |
-| Docker         | Local infrastructure     |
-| Docker Compose | Local MySQL environment  |
-| ESLint         | Static analysis          |
-| Prettier       | Code formatting          |
-| Jest           | Unit testing             |
-| Supertest      | HTTP integration testing |
-
----
-
-## 3.3 Infrastructure Not Used Initially
-
-The following technologies are intentionally excluded from the initial architecture:
-
-* Redis.
-* Kafka.
-* RabbitMQ.
-* Elasticsearch.
-* Kubernetes.
-* Microservices.
-
-They may be introduced in future versions if actual technical requirements justify them.
-
----
-
-# 4. System Modules
-
-StockFlow will be organized into business-oriented modules.
+El backend seguirá la siguiente estructura de alto nivel:
 
 ```text
 src/
+├── modules/
+│   ├── identity/
+│   ├── organizations/
+│   ├── catalog/
+│   ├── inventory/
+│   ├── transfers/
+│   ├── purchasing/
+│   ├── alerts/
+│   ├── audit/
+│   └── reporting/
+│
+├── common/
+├── config/
+├── database/
+├── app.module.ts
+└── main.ts
+```
+
+### modules/
+
+Contiene los módulos de negocio de la aplicación.
+
+### common/
+
+Contiene funcionalidad que es genuinamente compartida entre varios módulos.
+
+Ejemplos:
+
+```text
+common/
+├── decorators/
+├── guards/
+├── filters/
+├── interceptors/
+└── exceptions/
+```
+
+El código compartido solo debe colocarse en `common/` cuando sea realmente
+transversal.
+
+La lógica específica de negocio debe permanecer dentro de su propio módulo.
+
+### config/
+
+Contiene la configuración de la aplicación.
+
+Ejemplos:
+
+```text
+config/
+├── app.config.ts
+└── database.config.ts
+```
+
+### database/
+
+Contiene la configuración a nivel de base de datos y la infraestructura de
+persistencia compartida.
+
+---
+
+## 5. Módulos del sistema
+
+StockFlow se organizará en módulos orientados al negocio.
+
+```text
+src/modules/
 ├── identity/
 ├── organizations/
 ├── catalog/
@@ -138,244 +237,240 @@ src/
 └── reporting/
 ```
 
-Each module owns a specific part of the business domain.
+Cada módulo es propietario de una parte específica del dominio de negocio.
+
+Una entidad del Modelo de Dominio debe tener un módulo propietario claramente
+definido.
 
 ---
 
-# 5. Module Responsibilities
+## 6. Responsabilidades de los módulos
 
-## 5.1 Identity
+### 6.1 Identity
 
-Responsible for authentication and user access.
+Responsable de la autenticación, los usuarios y el control de acceso.
 
-### Entities
+#### Entidades
 
-* User
-* Role
-* UserRole
+- `User`
+- `Role`
+- `UserRole`
 
-### Responsibilities
+#### Responsabilidades
 
-* User management.
-* Authentication.
-* Password management.
-* Role assignment.
-* Authorization.
-* JWT generation and validation.
+- Gestión de usuarios.
+- Autenticación.
+- Gestión de contraseñas.
+- Asignación de roles.
+- Autorización.
+- Generación y validación de JWT.
+
+### 6.2 Organizations
+
+Responsable de la estructura organizativa de StockFlow.
+
+#### Entidades
+
+- `Company`
+- `Branch`
+- `Warehouse`
+
+#### Responsabilidades
+
+- Gestión de empresas.
+- Gestión de sucursales.
+- Gestión de almacenes.
+- Configuración del almacén predeterminado.
+- Relaciones organizativas.
+
+### 6.3 Catalog
+
+Responsable de la información de productos y categorías.
+
+#### Entidades
+
+- `Product`
+- `Category`
+
+#### Responsabilidades
+
+- Gestión de productos.
+- Gestión de SKU.
+- Gestión de categorías.
+- Activación y desactivación de productos.
+- Consultas del catálogo de productos.
+
+### 6.4 Inventory
+
+Responsable del stock actual y de los movimientos de inventario.
+
+#### Entidades
+
+- `Inventory`
+- `InventoryMovement`
+- `InventoryAdjustment`
+
+#### Responsabilidades
+
+- Gestión de stock.
+- Aumentos de stock.
+- Disminuciones de stock.
+- Movimientos de inventario.
+- Ajustes de inventario.
+- Validación de inventario.
+- Disponibilidad de stock.
+- Historial de inventario.
+
+El inventario es uno de los módulos más críticos del sistema.
+
+### 6.5 Transfers
+
+Responsable de transferir inventario entre almacenes.
+
+#### Entidades
+
+- `InventoryTransfer`
+
+#### Responsabilidades
+
+- Crear transferencias.
+- Enviar transferencias.
+- Recibir transferencias.
+- Recepción parcial.
+- Validación de transferencias.
+- Historial de transferencias.
+
+El módulo de Transferencias debe utilizar los contratos de aplicación públicos
+del módulo de Inventario para realizar los cambios reales de stock.
+
+### 6.6 Purchasing
+
+Responsable de los proveedores y las órdenes de compra.
+
+#### Entidades
+
+- `Supplier`
+- `PurchaseOrder`
+- `PurchaseOrderItem`
+
+#### Responsabilidades
+
+- Gestión de proveedores.
+- Creación de órdenes de compra.
+- Gestión de órdenes de compra.
+- Recepción parcial.
+- Recepción completa.
+- Cancelación de órdenes de compra.
+
+La recepción de una orden de compra debe interactuar con el módulo de Inventario
+a través de su contrato de aplicación público para aumentar el stock.
+
+### 6.7 Alerts
+
+Responsable de las alertas relacionadas con el inventario.
+
+#### Entidades
+
+- `Alert`
+
+#### Responsabilidades
+
+- Detección de stock bajo.
+- Creación de alertas.
+- Resolución de alertas.
+- Consultas de alertas activas.
+
+El módulo de Alertas debe reaccionar a los eventos de inventario relevantes en
+lugar de modificar directamente el inventario.
+
+### 6.8 Audit
+
+Responsable de la auditoría de negocio.
+
+#### Entidades
+
+- `AuditLog`
+
+#### Responsabilidades
+
+- Registrar acciones de negocio relevantes.
+- Almacenar la información del actor.
+- Almacenar la entidad afectada.
+- Almacenar el estado anterior y el nuevo estado cuando corresponda.
+- Mantener un historial inmutable.
+- Proporcionar consultas de auditoría.
+
+El módulo de Auditoría debe consumir principalmente los eventos de dominio
+generados por otros módulos.
+
+Los módulos de negocio no deben manipular directamente la entidad `AuditLog`.
+
+### 6.9 Reporting
+
+Responsable de los informes de negocio orientados a lectura.
+
+#### Responsabilidades
+
+- Inventario consolidado.
+- Stock por almacén.
+- Stock por sucursal.
+- Historial de movimientos de inventario.
+- Valoración de inventario.
+- Exportaciones futuras.
+
+Reporting no debe modificar el estado del dominio.
 
 ---
 
-## 5.2 Organizations
-
-Responsible for the organizational structure of StockFlow.
-
-### Entities
-
-* Company
-* Branch
-* Warehouse
-
-### Responsibilities
-
-* Company management.
-* Branch management.
-* Warehouse management.
-* Default warehouse configuration.
-* Organizational relationships.
-
----
-
-## 5.3 Catalog
-
-Responsible for product information.
-
-### Entities
-
-* Product
-* Category
-
-### Responsibilities
-
-* Product management.
-* SKU management.
-* Category management.
-* Product activation/deactivation.
-* Product catalog queries.
-
----
-
-## 5.4 Inventory
-
-Responsible for the current stock and its movements.
-
-### Entities
-
-* Inventory
-* InventoryMovement
-* InventoryAdjustment
-
-### Responsibilities
-
-* Stock management.
-* Stock increases.
-* Stock decreases.
-* Inventory movements.
-* Inventory adjustments.
-* Inventory validation.
-* Stock availability.
-* Inventory history.
-
-Inventory is one of the most critical modules in the system.
-
----
-
-## 5.5 Transfers
-
-Responsible for inventory movement between warehouses.
-
-### Entities
-
-* InventoryTransfer
-
-### Responsibilities
-
-* Create transfers.
-* Send transfers.
-* Receive transfers.
-* Partial reception.
-* Transfer validation.
-* Transfer history.
-
-The Transfers module must use the Inventory module to perform actual stock changes.
-
----
-
-## 5.6 Purchasing
-
-Responsible for suppliers and purchase orders.
-
-### Entities
-
-* Supplier
-* PurchaseOrder
-* PurchaseOrderItem
-
-### Responsibilities
-
-* Supplier management.
-* Purchase order creation.
-* Purchase order management.
-* Partial reception.
-* Complete reception.
-* Purchase order cancellation.
-
-Purchase order reception must interact with the Inventory module to increase stock.
-
----
-
-## 5.7 Alerts
-
-Responsible for inventory-related alerts.
-
-### Entities
-
-* Alert
-
-### Responsibilities
-
-* Low stock detection.
-* Alert creation.
-* Alert resolution.
-* Active alert queries.
-
-The Alerts module should react to relevant inventory events rather than directly modifying inventory.
-
----
-
-## 5.8 Audit
-
-Responsible for immutable business auditing.
-
-### Entities
-
-* AuditLog
-
-### Responsibilities
-
-* Record relevant business actions.
-* Store actor information.
-* Store affected entity.
-* Store previous and new state when appropriate.
-* Maintain immutable history.
-* Provide audit queries.
-
-The Audit module should primarily consume Domain Events generated by other modules.
-
----
-
-## 5.9 Reporting
-
-Responsible for read-oriented business reports.
-
-### Responsibilities
-
-* Consolidated inventory.
-* Stock by warehouse.
-* Stock by branch.
-* Inventory movement history.
-* Inventory valuation.
-* Future exports.
-
-Reporting should avoid modifying domain state.
-
----
-
-# 6. Module Ownership
-
-Each entity must have one owning module.
-
-| Entity              | Owner         |
-| ------------------- | ------------- |
-| Company             | Organizations |
-| User                | Identity      |
-| Role                | Identity      |
-| UserRole            | Identity      |
-| Branch              | Organizations |
-| Warehouse           | Organizations |
-| Product             | Catalog       |
-| Category            | Catalog       |
-| Inventory           | Inventory     |
-| InventoryMovement   | Inventory     |
-| InventoryAdjustment | Inventory     |
-| InventoryTransfer   | Transfers     |
-| Supplier            | Purchasing    |
-| PurchaseOrder       | Purchasing    |
-| PurchaseOrderItem   | Purchasing    |
-| Alert               | Alerts        |
-| AuditLog            | Audit         |
-
-An entity must not be directly modified by another module.
-
-For example:
+## 7. Propiedad de los módulos
+
+Cada entidad debe tener un módulo propietario.
+
+| Entidad               | Módulo        |
+| --------------------- | ------------- |
+| `Company`             | Organizations |
+| `User`                | Identity      |
+| `Role`                | Identity      |
+| `UserRole`            | Identity      |
+| `Branch`              | Organizations |
+| `Warehouse`           | Organizations |
+| `Product`             | Catalog       |
+| `Category`            | Catalog       |
+| `Inventory`           | Inventory     |
+| `InventoryMovement`   | Inventory     |
+| `InventoryAdjustment` | Inventory     |
+| `InventoryTransfer`   | Transfers     |
+| `Supplier`            | Purchasing    |
+| `PurchaseOrder`       | Purchasing    |
+| `PurchaseOrderItem`   | Purchasing    |
+| `Alert`               | Alerts        |
+| `AuditLog`            | Audit         |
+
+Una entidad no debe ser modificada directamente por otro módulo.
+
+Por ejemplo:
 
 ```text
 Purchasing
-    ❌ directly modifies Inventory entity
+    ❌ modifica directamente la entidad Inventory
+```
 
+```text
 Purchasing
     ↓
-Inventory Application Use Case
+Use Case de aplicación de Inventory
     ↓
 Inventory
 ```
 
+El módulo propietario es responsable de proteger las reglas y el estado de sus
+entidades.
+
 ---
 
-# 7. Internal Module Structure
+## 8. Estructura interna del módulo
 
-Each business module will follow a consistent internal structure.
-
-Example:
+Cada módulo de negocio puede seguir la siguiente estructura interna:
 
 ```text
 inventory/
@@ -391,114 +486,129 @@ inventory/
 │   ├── dto/
 │   └── services/
 │
-└── infrastructure/
-    ├── persistence/
-    │   ├── entities/
-    │   ├── repositories/
-    │   └── migrations/
-    │
-    └── http/
-        ├── controllers/
-        └── dto/
+├── infrastructure/
+│   ├── persistence/
+│   │   ├── entities/
+│   │   ├── repositories/
+│   │   └── migrations/
+│   │
+│   └── http/
+│       ├── controllers/
+│       └── dto/
+│
+└── inventory.module.ts
 ```
 
-Not every module must contain every directory.
+No todos los módulos deben contener todos los directorios.
 
-Directories should only exist when they provide value.
+Los directorios solo deben existir cuando aporten valor.
+
+La arquitectura debe evitar crear abstracciones vacías o innecesarias.
 
 ---
 
-# 8. Architectural Layers
+## 9. Capas de la arquitectura
 
-## 8.1 Domain Layer
+Cada módulo puede dividirse en tres capas principales:
 
-The Domain layer contains business rules and domain behavior.
+- Dominio.
+- Aplicación.
+- Infraestructura.
 
-Responsibilities:
+Estas capas existen dentro del módulo, en lugar de ser capas globales de la
+aplicación.
 
-* Entities.
-* Value Objects.
-* Domain Services.
-* Domain Events.
-* Repository interfaces.
-
-The Domain layer must not depend on:
-
-* NestJS.
-* TypeORM.
-* HTTP.
-* MySQL.
-* Express.
-* External APIs.
-
-Example:
+Ejemplo:
 
 ```text
-Inventory
-InventoryMovement
-InventoryAdjustment
-StockIncreased
-StockDecreased
-InventoryRepository
+modules/
+└── inventory/
+    ├── domain/
+    ├── application/
+    └── infrastructure/
 ```
+
+### 9.1 Capa de dominio
+
+La capa de dominio contiene las reglas de negocio y el comportamiento del
+dominio.
+
+Responsabilidades:
+
+- Entidades.
+- Objetos de valor.
+- Servicios de dominio.
+- Eventos de dominio.
+- Interfaces de repositorio.
+- Invariantes del dominio.
+
+La capa de dominio no debe depender de:
+
+- NestJS.
+- TypeORM.
+- HTTP.
+- MySQL.
+- Express.
+- APIs externas.
+
+Ejemplo:
+
+- `Inventory`
+- `InventoryMovement`
+- `InventoryAdjustment`
+- `StockIncreased`
+- `StockDecreased`
+- `InventoryRepository`
+
+### 9.2 Capa de aplicación
+
+La capa de aplicación coordina los casos de uso del negocio.
+
+Responsabilidades:
+
+- Casos de uso.
+- DTOs de aplicación.
+- Coordinación de transacciones.
+- Orquestación de objetos de dominio.
+- Llamadas a las interfaces de repositorio.
+- Publicación de eventos de dominio.
+
+Ejemplos:
+
+- `IncreaseStockUseCase`
+- `DecreaseStockUseCase`
+- `RequestInventoryAdjustmentUseCase`
+- `ApproveInventoryAdjustmentUseCase`
+
+La capa de aplicación puede depender de la capa de dominio.
+
+### 9.3 Capa de infraestructura
+
+La capa de infraestructura contiene las implementaciones técnicas.
+
+Responsabilidades:
+
+- Repositorios TypeORM.
+- Entidades de base de datos.
+- Configuración de MySQL.
+- Controladores HTTP.
+- Integraciones con servicios externos.
+- Implementaciones específicas del framework.
+
+Ejemplos:
+
+- `TypeOrmInventoryRepository`
+- `InventoryController`
+- `DatabaseModule`
+- `JwtAuthGuard`
+
+La infraestructura puede depender de la capa de aplicación y de dominio.
 
 ---
 
-## 8.2 Application Layer
+## 10. Dirección de dependencias
 
-The Application layer coordinates business use cases.
-
-Responsibilities:
-
-* Use Cases.
-* Application DTOs.
-* Transaction coordination.
-* Domain object orchestration.
-* Calling repositories.
-* Publishing domain events.
-
-Examples:
-
-```text
-IncreaseStockUseCase
-DecreaseStockUseCase
-RequestInventoryAdjustmentUseCase
-ApproveInventoryAdjustmentUseCase
-```
-
-The Application layer may depend on the Domain layer.
-
----
-
-## 8.3 Infrastructure Layer
-
-The Infrastructure layer contains technical implementations.
-
-Responsibilities:
-
-* TypeORM repositories.
-* Database entities.
-* MySQL configuration.
-* HTTP controllers.
-* External service integrations.
-* Framework-specific implementations.
-
-Examples:
-
-```text
-TypeOrmInventoryRepository
-InventoryController
-DatabaseModule
-JwtAuthGuard
-```
-
-Infrastructure may depend on Application and Domain.
-
----
-
-# 9. Dependency Direction
-
-Dependencies must point toward the domain.
+Las dependencias deben apuntar hacia el dominio.
 
 ```text
 Infrastructure
@@ -510,9 +620,9 @@ Application
 Domain
 ```
 
-The Domain must not depend on Infrastructure.
+El dominio no debe depender de la infraestructura.
 
-### Allowed
+Permitido
 
 ```text
 Controller
@@ -522,7 +632,7 @@ Use Case
 Domain
 ```
 
-### Not Allowed
+No permitido
 
 ```text
 Domain
@@ -530,7 +640,7 @@ Domain
 TypeORM
 ```
 
-### Not Allowed
+No permitido
 
 ```text
 Domain
@@ -538,27 +648,28 @@ Domain
 NestJS Controller
 ```
 
----
-
-# 10. Module Communication
-
-Modules must communicate through clearly defined contracts.
-
-Preferred communication methods:
-
-1. Application Use Cases.
-2. Domain Events.
-3. Explicit module interfaces.
-
-Direct access to another module's internal implementation is prohibited.
+El objetivo es mantener las reglas de negocio independientes de los detalles
+técnicos de implementación.
 
 ---
 
-## 10.1 Synchronous Communication
+## 11. Comunicación entre módulos
 
-Used when one operation requires an immediate result.
+Los módulos deben comunicarse a través de contratos claramente definidos.
 
-Example:
+Métodos de comunicación preferidos:
+
+- Casos de uso de aplicación.
+- Interfaces de aplicación públicas.
+- Eventos de dominio.
+
+El acceso directo a la implementación interna de otro módulo está prohibido.
+
+### 11.1 Comunicación síncrona
+
+Se utiliza cuando una operación requiere un resultado inmediato.
+
+Ejemplo:
 
 ```text
 PurchaseOrder
@@ -567,19 +678,17 @@ PurchaseOrder
 ReceivePurchaseOrderUseCase
       │
       ▼
-Inventory Module
+Inventory Public Use Case
       │
       ▼
 IncreaseStockUseCase
 ```
 
----
+### 11.2 Comunicación basada en eventos
 
-## 10.2 Event-Based Communication
+Se utiliza cuando otros módulos necesitan reaccionar a algo que ha ocurrido.
 
-Used when other modules need to react to something that happened.
-
-Example:
+Ejemplo:
 
 ```text
 Inventory
@@ -592,59 +701,51 @@ StockIncreased
     └──→ Reporting
 ```
 
+Los eventos de dominio deben usarse cuando la operación no requiere un
+acoplamiento directo con el consumidor.
+
 ---
 
-# 11. Module Dependency Rules
+## 12. Reglas de dependencia entre módulos
 
-The following dependency direction is preferred:
+Los módulos deben mantener límites claros.
+
+Un módulo nunca debe importar directamente de otro módulo:
+
+- ❌ La implementación de una entidad.
+- ❌ El repositorio TypeORM.
+- ❌ El modelo de base de datos.
+- ❌ Un servicio interno.
+- ❌ Un controlador interno.
+
+En su lugar, los módulos deben comunicarse a través de:
+
+- ✅ Casos de uso de aplicación públicos.
+- ✅ Interfaces públicas.
+- ✅ Eventos de dominio.
+
+Ejemplo:
 
 ```text
-Identity
-   │
-   ▼
-Organizations
-   │
-   ▼
-Catalog
-   │
-   ▼
+Purchasing
+    │
+    ▼
+Contrato público de Inventory
+    │
+    ▼
 Inventory
-   │
-   ├──→ Transfers
-   │
-   └──→ Purchasing
 ```
 
-However, business dependencies should be implemented through application contracts rather than direct access to another module's internals.
-
-### Important Rule
-
-A module must never import another module's:
-
-```text
-❌ Entity implementation
-❌ TypeORM repository
-❌ Database model
-❌ Internal service
-❌ Internal controller
-```
-
-Instead, it should use:
-
-```text
-✅ Public application service
-✅ Public use case
-✅ Public interface
-✅ Domain event
-```
+Esto evita que los módulos de negocio queden fuertemente acoplados a los
+detalles de implementación de otros módulos.
 
 ---
 
-# 12. Module Public API
+## 13. API pública del módulo
 
-Each module should expose only what other modules need.
+Cada módulo debe exponer solo lo que otros módulos necesitan.
 
-Example:
+Ejemplo:
 
 ```text
 inventory/
@@ -653,23 +754,27 @@ inventory/
 │   ├── decrease-stock.use-case.ts
 │   └── inventory.types.ts
 │
-└── internal/
-    ├── entities/
-    ├── repositories/
-    └── services/
+├── domain/
+├── application/
+├── infrastructure/
+└── inventory.module.ts
 ```
 
-The exact implementation of this public API will be defined during project setup.
+El área `public/` representa el contrato externo del módulo.
 
-The objective is to prevent other modules from depending on internal implementation details.
+Los detalles de implementación internos deben permanecer inaccesibles para
+otros módulos.
+
+La implementación exacta de la API pública se definirá durante el desarrollo de
+los módulos.
 
 ---
 
-# 13. Database Architecture
+## 14. Arquitectura de base de datos
 
-StockFlow will use MySQL as its primary relational database.
+StockFlow utilizará MySQL como base de datos relacional principal.
 
-All modules will initially share the same database.
+Todos los módulos compartirán inicialmente la misma base de datos.
 
 ```text
 StockFlow
@@ -679,9 +784,12 @@ MySQL
     │
     ├── companies
     ├── users
+    ├── roles
+    ├── user_roles
     ├── branches
     ├── warehouses
     ├── products
+    ├── categories
     ├── inventories
     ├── inventory_movements
     ├── inventory_adjustments
@@ -693,56 +801,61 @@ MySQL
     └── audit_logs
 ```
 
-Although the database is shared, ownership of tables remains aligned with module boundaries.
+Aunque la base de datos es compartida, la propiedad de las tablas permanece
+alineada con los límites de los módulos.
+
+Los detalles del diseño de la base de datos se definen por separado en
+`DATABASE_DESIGN.md`.
 
 ---
 
-# 14. Database Transactions
+## 15. Transacciones de base de datos
 
-Transactions are required for operations that modify multiple related records and must remain atomic.
+Las transacciones son necesarias para las operaciones que modifican múltiples
+registros relacionados y deben permanecer atómicas.
 
-Example:
+Ejemplo:
+
+Recibir orden de compra
 
 ```text
-Receive Purchase Order
-
 BEGIN
     ↓
-Update PurchaseOrder
+Actualizar PurchaseOrder
     ↓
-Update Inventory
+Actualizar Inventory
     ↓
-Create InventoryMovement
+Crear InventoryMovement
     ↓
-Create Domain Events
+Crear eventos de dominio
     ↓
 COMMIT
 ```
 
-If any required operation fails:
+Si alguna operación requerida falla:
 
 ```text
 ROLLBACK
 ```
 
-The system must not leave partially completed inventory operations.
+El sistema no debe dejar operaciones de inventario parcialmente completadas.
 
-Critical transactional operations include:
+Las operaciones transaccionales críticas incluyen:
 
-* Stock increase.
-* Stock decrease.
-* Inventory adjustment.
-* Transfer send.
-* Transfer receive.
-* Purchase order reception.
+- Aumento de stock.
+- Disminución de stock.
+- Ajuste de inventario.
+- Envío de transferencia.
+- Recepción de transferencia.
+- Recepción de orden de compra.
 
 ---
 
-# 15. Concurrency and Inventory Consistency
+## 16. Concurrencia y consistencia del inventario
 
-Inventory operations must account for concurrent requests.
+Las operaciones de inventario deben tener en cuenta las peticiones concurrentes.
 
-Example:
+Ejemplo:
 
 ```text
 Stock = 10
@@ -751,19 +864,23 @@ Request A → Remove 7
 Request B → Remove 6
 ```
 
-The system must prevent both operations from succeeding if they would result in negative stock.
+El sistema debe impedir que ambas operaciones tengan éxito si dieran como
+resultado stock negativo.
 
-Inventory updates must use appropriate transactional and database-level mechanisms.
+Las actualizaciones de inventario deben usar mecanismos transaccionales y a
+nivel de base de datos apropiados.
 
-The exact locking strategy will be defined during database design and implementation.
+La estrategia exacta de bloqueo se definirá durante la implementación de la
+base de datos.
 
 ---
 
-# 16. Domain Events Architecture
+## 17. Arquitectura de eventos de dominio
 
-Domain Events are generated by the Domain/Application layer when relevant business actions occur.
+Los eventos de dominio representan eventos de negocio relevantes que han
+ocurrido.
 
-Example:
+Ejemplo:
 
 ```text
 IncreaseStockUseCase
@@ -782,19 +899,21 @@ Event Dispatcher
         └──→ Reporting Handler
 ```
 
-During the MVP, events are internal to the application.
+Durante el MVP, los eventos de dominio son internos a la aplicación.
 
-No external message broker will be used.
+No se requiere un broker de mensajes externo.
 
 ---
 
-# 17. Event Reliability
+## 18. Fiabilidad de eventos
 
-Domain events that are required only for internal synchronous processing may be dispatched within the application process.
+Los eventos de dominio necesarios solo para el procesamiento síncrono interno
+pueden despacharse dentro del proceso de la aplicación.
 
-For events that eventually require reliable asynchronous processing, the architecture may evolve toward the Outbox Pattern.
+Para los eventos que eventualmente requieran un procesamiento asíncrono fiable,
+la arquitectura puede evolucionar hacia el patrón Outbox.
 
-Future architecture:
+Arquitectura futura:
 
 ```text
 Transaction
@@ -809,21 +928,21 @@ Transaction
        Message Broker
 ```
 
-The Outbox Pattern is explicitly out of scope for the initial MVP.
+El patrón Outbox está fuera del alcance del MVP inicial.
 
 ---
 
-# 18. Authentication
+## 19. Autenticación
 
-Authentication will use JWT.
+La autenticación utilizará JWT.
 
-General flow:
+Flujo general:
 
 ```text
 Client
    │
    ▼
-POST /auth/login
+POST /api/v1/auth/login
    │
    ▼
 Identity Module
@@ -835,7 +954,7 @@ Identity Module
         Client
 ```
 
-Authenticated requests:
+Peticiones autenticadas:
 
 ```text
 Client
@@ -855,21 +974,21 @@ Controller
 
 ---
 
-# 19. Authorization
+## 20. Autorización
 
-StockFlow will use Role-Based Access Control (RBAC).
+StockFlow utilizará control de acceso basado en roles (RBAC).
 
-Roles defined in the DMD:
+Los roles definidos en el modelo de dominio incluyen:
 
-* Administrator.
-* Branch Manager.
-* Warehouse Operator.
-* Buyer.
-* Read-only / Auditor.
+- Administrador.
+- Gestor de sucursal.
+- Operador de almacén.
+- Comprador.
+- Solo lectura / Auditor.
 
-Authorization will be enforced at the application boundary.
+La autorización se aplicará en el límite de la aplicación.
 
-Example:
+Ejemplo:
 
 ```text
 ApproveInventoryAdjustment
@@ -879,20 +998,20 @@ Authorization
         │
         ├── Administrator → Allowed
         ├── Branch Manager → Allowed
-        └── Operator → Denied
+        └── Warehouse Operator → Denied
 ```
 
-The exact permission matrix will be defined before implementing authorization.
+La matriz de permisos completa se definirá antes de implementar la autorización.
 
 ---
 
-# 20. Validation
+## 21. Validación
 
-Validation will occur at multiple levels.
+La validación ocurrirá en múltiples niveles.
 
-### HTTP Validation
+### Validación HTTP
 
-Validates incoming requests.
+Valida las peticiones entrantes.
 
 ```text
 Controller
@@ -900,9 +1019,9 @@ Controller
 DTO Validation
 ```
 
-### Application Validation
+### Validación de aplicación
 
-Validates use-case requirements.
+Valida los requisitos de los casos de uso.
 
 ```text
 Use Case
@@ -910,9 +1029,9 @@ Use Case
 Business Preconditions
 ```
 
-### Domain Validation
+### Validación de dominio
 
-Protects domain invariants.
+Protege los invariantes del dominio.
 
 ```text
 Entity
@@ -920,51 +1039,51 @@ Entity
 Domain Rules
 ```
 
-No single validation layer should be responsible for all business rules.
+Ninguna capa de validación por sí sola debe ser responsable de todas las reglas
+de negocio.
 
 ---
 
-# 21. Error Handling
+## 22. Manejo de errores
 
-The API will expose standardized error responses.
+La API expondrá respuestas de error estandarizadas.
 
-Conceptual format:
+Formato conceptual:
 
 ```json
 {
   "statusCode": 400,
   "code": "INSUFFICIENT_STOCK",
-  "message": "Insufficient stock available.",
+  "message": "Stock insuficiente disponible.",
   "timestamp": "2026-08-09T20:00:00Z",
-  "path": "/api/inventory/..."
+  "path": "/api/v1/inventory/..."
 }
 ```
 
-Domain errors should use application-level error codes rather than exposing infrastructure exceptions.
+Los errores de dominio deben usar códigos de error a nivel de aplicación en
+lugar de exponer excepciones de infraestructura.
 
-Examples:
+Ejemplos:
 
-```text
-INSUFFICIENT_STOCK
-PRODUCT_NOT_FOUND
-WAREHOUSE_NOT_FOUND
-INVALID_TRANSFER
-TRANSFER_ALREADY_RECEIVED
-ADJUSTMENT_REQUIRES_APPROVAL
-PURCHASE_ORDER_ALREADY_CANCELLED
-```
+- `INSUFFICIENT_STOCK`
+- `PRODUCT_NOT_FOUND`
+- `WAREHOUSE_NOT_FOUND`
+- `INVALID_TRANSFER`
+- `TRANSFER_ALREADY_RECEIVED`
+- `ADJUSTMENT_REQUIRES_APPROVAL`
+- `PURCHASE_ORDER_ALREADY_CANCELLED`
 
-The complete error catalog will be defined during API design.
+El catálogo completo de errores se definirá durante el diseño de la API.
 
 ---
 
-# 22. Audit Architecture
+## 23. Arquitectura de auditoría
 
-AuditLog is owned by the Audit module.
+`AuditLog` es propiedad del módulo de Auditoría.
 
-Business modules should not directly manipulate `AuditLog`.
+Los módulos de negocio no deben manipular directamente `AuditLog`.
 
-Preferred flow:
+Flujo preferido:
 
 ```text
 Business Operation
@@ -979,7 +1098,7 @@ Audit Event Handler
 AuditLog
 ```
 
-Example:
+Ejemplo:
 
 ```text
 InventoryTransferSent
@@ -991,44 +1110,59 @@ AuditHandler
 AuditLog
 ```
 
-This keeps auditing independent from the business logic that generated the event.
+Los registros de auditoría son inmutables.
 
-Audit records are immutable.
+La funcionalidad de auditoría es responsable de registrar las acciones de
+negocio relevantes, incluyendo:
 
----
+- Actor.
+- Acción.
+- Entidad.
+- Identificador de la entidad.
+- Estado anterior cuando corresponda.
+- Estado nuevo cuando corresponda.
+- Marca de tiempo.
+- Metadatos relevantes.
 
-# 23. Logging
-
-Application logging will be separated from business auditing.
-
-### Application Logs
-
-Used for:
-
-* Errors.
-* Debugging.
-* Infrastructure events.
-* Performance diagnostics.
-* Operational monitoring.
-
-### Audit Logs
-
-Used for:
-
-* Business actions.
-* User actions.
-* Entity changes.
-* Compliance/history.
-
-They must not be treated as the same system.
+La estrategia exacta de implementación para generar registros de auditoría se
+definirá durante la implementación del módulo de Auditoría.
 
 ---
 
-# 24. Configuration Management
+## 24. Registro de la aplicación
 
-Configuration will be managed through environment variables.
+El registro de la aplicación y la auditoría de negocio son preocupaciones
+separadas.
 
-Example:
+### Registros de la aplicación
+
+Se utilizan para:
+
+- Errores.
+- Depuración.
+- Eventos de infraestructura.
+- Diagnósticos de rendimiento.
+- Supervisión operativa.
+
+### Registros de auditoría
+
+Se utilizan para:
+
+- Acciones de negocio.
+- Acciones de usuario.
+- Cambios de entidades.
+- Cumplimiento e historial.
+
+Los registros de aplicación y los registros de auditoría no deben tratarse como
+el mismo sistema.
+
+---
+
+## 25. Gestión de configuración
+
+La configuración se gestionará a través de variables de entorno.
+
+Ejemplo:
 
 ```text
 NODE_ENV
@@ -1044,85 +1178,84 @@ JWT_SECRET
 JWT_EXPIRES_IN
 ```
 
-Sensitive values must not be committed to Git.
+Los valores sensibles no deben confirmarse en el repositorio Git.
 
-A `.env.example` file will document required variables without containing secrets.
-
----
-
-# 25. API Architecture
-
-The backend will expose a REST API.
-
-Base path:
-
-```text
-/api
-```
-
-Example resources:
-
-```text
-/api/auth
-/api/users
-/api/companies
-/api/branches
-/api/warehouses
-/api/products
-/api/categories
-/api/inventory
-/api/inventory-movements
-/api/inventory-adjustments
-/api/transfers
-/api/suppliers
-/api/purchase-orders
-/api/alerts
-/api/audit-logs
-/api/reports
-```
-
-API design will follow REST principles where appropriate.
-
-Detailed endpoints will be defined in a separate API Design document.
+Un archivo `.env.example` documentará las variables requeridas sin contener
+secretos.
 
 ---
 
-# 26. API Versioning
+## 26. Arquitectura de la API
 
-The API will be designed to support future versioning.
+El backend expondrá una API REST.
 
-Initial version:
+Ruta base:
 
 ```text
 /api/v1
 ```
 
-Example:
+Recursos de ejemplo:
 
 ```text
+/api/v1/auth
+/api/v1/users
+/api/v1/companies
+/api/v1/branches
+/api/v1/warehouses
 /api/v1/products
+/api/v1/categories
 /api/v1/inventory
+/api/v1/inventory-movements
+/api/v1/inventory-adjustments
 /api/v1/transfers
+/api/v1/suppliers
+/api/v1/purchase-orders
+/api/v1/alerts
+/api/v1/audit-logs
+/api/v1/reports
 ```
 
-Breaking changes should require a new API version.
+El diseño de la API seguirá los principios REST cuando corresponda.
+
+Los endpoints detallados se definirán en un documento separado de diseño de la
+API.
 
 ---
 
-# 27. Testing Strategy
+## 27. Versionado de la API
 
-StockFlow will use multiple testing levels.
+La versión inicial de la API será:
 
-## 27.1 Unit Tests
+```text
+/api/v1
+```
 
-Used primarily for:
+Ejemplo:
 
-* Domain entities.
-* Value Objects.
-* Domain Services.
-* Use Cases.
+- `/api/v1/products`
+- `/api/v1/inventory`
+- `/api/v1/transfers`
 
-Example:
+Los cambios que rompan la compatibilidad deberán requerir una nueva versión de
+la API.
+
+---
+
+## 28. Estrategia de pruebas
+
+StockFlow utilizará múltiples niveles de pruebas.
+
+### 28.1 Pruebas unitarias
+
+Se utilizan principalmente para:
+
+- Entidades de dominio.
+- Objetos de valor.
+- Servicios de dominio.
+- Casos de uso.
+
+Ejemplo:
 
 ```text
 IncreaseStockUseCase
@@ -1132,18 +1265,16 @@ Unit Test
 Stock increases correctly
 ```
 
----
+### 28.2 Pruebas de integración
 
-## 27.2 Integration Tests
+Se utilizan para:
 
-Used for:
+- Repositorios.
+- Persistencia en MySQL.
+- Transacciones.
+- Interacciones entre módulos.
 
-* Repositories.
-* MySQL persistence.
-* Transactions.
-* Module interactions.
-
-Example:
+Ejemplo:
 
 ```text
 ReceivePurchaseOrder
@@ -1155,49 +1286,49 @@ Inventory updated
 Movement created
 ```
 
----
+### 28.3 Pruebas de extremo a extremo
 
-## 27.3 End-to-End Tests
+Se utilizan para flujos completos de la API.
 
-Used for complete API flows.
-
-Example:
+Ejemplo:
 
 ```text
-POST /auth/login
+POST /api/v1/auth/login
         ↓
-POST /purchase-orders
+POST /api/v1/purchase-orders
         ↓
-POST /purchase-orders/:id/receive
+POST /api/v1/purchase-orders/:id/receive
         ↓
-GET /inventory
+GET /api/v1/inventory
 ```
 
-The testing pyramid should favor unit tests while maintaining integration and E2E coverage for critical business flows.
+La estrategia de pruebas debe priorizar las pruebas unitarias mientras mantiene
+la cobertura de integración y E2E para los flujos de negocio críticos.
 
 ---
 
-# 28. Code Quality
+## 29. Calidad del código
 
-The project will enforce:
+El proyecto aplicará:
 
-* TypeScript strict mode.
-* ESLint.
-* Prettier.
-* Automated tests.
-* Consistent naming conventions.
-* Small and focused classes/functions.
-* Clear module boundaries.
+- Modo estricto de TypeScript.
+- ESLint.
+- Prettier.
+- Pruebas automatizadas.
+- Convenciones de nomenclatura consistentes.
+- Clases y funciones pequeñas y enfocadas.
+- Límites de módulos claros.
+- Separación entre la lógica de negocio y la infraestructura.
 
-Pull Requests should not introduce unnecessary architectural coupling.
+Los Pull Requests no deben introducir acoplamiento arquitectónico innecesario.
 
 ---
 
-# 29. Git Strategy
+## 30. Estrategia de Git
 
-The project will use Git for version control.
+El proyecto utilizará Git para el control de versiones.
 
-Recommended branch structure:
+Estructura de ramas recomendada:
 
 ```text
 main
@@ -1207,51 +1338,49 @@ fix/*
 refactor/*
 ```
 
-Example:
+Ejemplo:
 
-```text
-feature/inventory-adjustments
-feature/purchase-orders
-fix/transfer-reception
-```
+- `feature/inventory-adjustments`
+- `feature/purchase-orders`
+- `fix/transfer-reception`
 
-Commits should describe the change clearly.
+Los commits deben describir el cambio claramente.
 
-Example:
+Ejemplos:
 
-```text
-feat(inventory): implement stock increase
-feat(transfers): add transfer reception
-fix(inventory): prevent negative stock
-test(inventory): add decrease stock tests
-```
+- `feat(inventory): implement stock increase`
+- `feat(transfers): add transfer reception`
+- `fix(inventory): prevent negative stock`
+- `test(inventory): add decrease stock tests`
 
 ---
 
-# 30. CI/CD
+## 31. CI/CD
 
-Initial CI pipeline should perform:
+El pipeline de CI inicial debe realizar:
 
 ```text
 Push / Pull Request
         │
-        ├── Install dependencies
+        ├── Instalar dependencias
         ├── Lint
-        ├── Type check
-        ├── Unit tests
-        ├── Integration tests
+        ├── Verificación de tipos
+        ├── Pruebas unitarias
+        ├── Pruebas de integración
         └── Build
 ```
 
-Deployment automation will be implemented after the MVP architecture is stable.
+La automatización del despliegue se implementará después de que la arquitectura
+del MVP sea estable.
 
 ---
 
-# 31. Docker Strategy
+## 32. Estrategia de Docker
 
-Docker will be used primarily for local infrastructure during development.
+Docker se utilizará principalmente para la infraestructura local durante el
+desarrollo.
 
-Initial environment:
+Entorno inicial:
 
 ```text
 Docker Compose
@@ -1259,66 +1388,69 @@ Docker Compose
     └── MySQL
 ```
 
-The NestJS application may initially run directly through Node.js during development.
+La aplicación NestJS puede ejecutarse inicialmente directamente con Node.js
+durante el desarrollo.
 
-Future environments may containerize the complete application.
-
----
-
-# 32. Security Principles
-
-StockFlow must follow basic application security principles.
-
-### Authentication
-
-* Passwords must be securely hashed.
-* JWT secrets must be stored outside source control.
-* Tokens must have expiration.
-
-### Authorization
-
-* Every protected operation must verify permissions.
-* Authorization must not rely solely on frontend restrictions.
-
-### Data Protection
-
-* Sensitive data must not appear in logs.
-* Database credentials must not be committed.
-* Audit data must remain immutable.
-
-### API Security
-
-* Input validation.
-* Rate limiting when required.
-* Proper HTTP status codes.
-* Secure headers.
-* Controlled error responses.
+Los entornos futuros pueden contener la aplicación completa.
 
 ---
 
-# 33. Performance Principles
+## 33. Principios de seguridad
 
-The initial system should prioritize correctness and maintainability over premature optimization.
+StockFlow debe seguir principios básicos de seguridad de aplicaciones.
 
-Performance considerations include:
+### Autenticación
 
-* Proper database indexes.
-* Pagination for large collections.
-* Efficient inventory queries.
-* Avoiding N+1 queries.
-* Transaction scope minimization.
-* Appropriate eager/lazy loading strategy.
-* Caching only when a real performance requirement exists.
+- Las contraseñas deben cifrarse de forma segura.
+- Los secretos JWT deben almacenarse fuera del control de código fuente.
+- Los tokens deben tener expiración.
 
-Redis will not be introduced until measurements demonstrate a need.
+### Autorización
+
+- Cada operación protegida debe verificar permisos.
+- La autorización no debe basarse únicamente en las restricciones del frontend.
+
+### Protección de datos
+
+- Los datos sensibles no deben aparecer en los registros.
+- Las credenciales de base de datos no deben confirmarse.
+- Los datos de auditoría deben permanecer inmutables.
+
+### Seguridad de la API
+
+- Validación de entrada.
+- Limitación de tasa cuando sea requerido.
+- Códigos de estado HTTP adecuados.
+- Cabeceras seguras.
+- Respuestas de error controladas.
 
 ---
 
-# 34. Scalability Strategy
+## 34. Principios de rendimiento
 
-StockFlow will initially scale vertically and through multiple application instances if necessary.
+El sistema inicial debe priorizar la corrección y el mantenimiento sobre la
+optimización prematura.
 
-Future architecture may evolve toward:
+Las consideraciones de rendimiento incluyen:
+
+- Índices de base de datos adecuados.
+- Paginación para colecciones grandes.
+- Consultas de inventario eficientes.
+- Evitar consultas N+1.
+- Minimizar el alcance de las transacciones.
+- Estrategias de carga apropiadas.
+- Caché solo cuando exista un requisito de rendimiento real.
+
+Redis no se introducirá hasta que las mediciones demuestren una necesidad.
+
+---
+
+## 35. Estrategia de escalabilidad
+
+StockFlow se escalará inicialmente de forma vertical y mediante múltiples
+instancias de aplicación si fuera necesario.
+
+La arquitectura futura puede evolucionar hacia:
 
 ```text
                     Load Balancer
@@ -1332,40 +1464,42 @@ Future architecture may evolve toward:
                        MySQL
 ```
 
-If future requirements justify it, individual modules may eventually become independent services.
+Si los requisitos futuros lo justifican, los módulos individuales pueden
+convertirse eventualmente en servicios independientes.
 
-This is not part of the MVP.
-
----
-
-# 35. Future Evolution
-
-Potential future capabilities include:
-
-* Redis caching.
-* Background jobs.
-* Outbox Pattern.
-* Message broker.
-* Email notifications.
-* Barcode scanning.
-* Customer sales.
-* POS integration.
-* ERP integration.
-* E-commerce integration.
-* Advanced reporting.
-* Demand forecasting.
-* Mobile application.
-* Microservice extraction.
-
-The architecture should make these evolutions possible without implementing them prematurely.
+Esto no forma parte del MVP.
 
 ---
 
-# 36. Architecture Decision Records
+## 36. Evolución futura
 
-Important architectural decisions should be documented using ADRs.
+Las capacidades futuras potenciales incluyen:
 
-Examples:
+- Caché con Redis.
+- Trabajos en segundo plano.
+- Patrón Outbox.
+- Broker de mensajes.
+- Notificaciones por correo electrónico.
+- Escaneo de códigos de barras.
+- Ventas a clientes.
+- Integración con POS.
+- Integración con ERP.
+- Integración con e-commerce.
+- Informes avanzados.
+- Previsión de demanda.
+- Aplicación móvil.
+- Extracción de microservicios.
+
+Estas capacidades solo deben introducirse cuando los requisitos reales
+justifiquen su complejidad.
+
+---
+
+## 37. Registros de decisiones de arquitectura
+
+Las decisiones arquitectónicas importantes deben documentarse mediante ADRs.
+
+Estructura de ejemplo:
 
 ```text
 docs/
@@ -1377,59 +1511,91 @@ docs/
     └── 005-jwt-authentication.md
 ```
 
-An ADR should contain:
+Un ADR debe contener:
 
 ```text
-# Decision
+# Decisión
 
-## Context
+## Contexto
 
-## Options Considered
+## Opciones consideradas
 
-## Decision
+## Decisión
 
-## Consequences
+## Consecuencias
 ```
 
-ADRs should be created when a decision has a meaningful long-term architectural impact.
+Los ADRs deben crearse cuando una decisión tenga un impacto arquitectónico
+significativo a largo plazo.
 
 ---
 
-# 37. Architecture Constraints
+## 38. Restricciones de la arquitectura
 
-The following constraints are established for the initial MVP:
+Las siguientes restricciones se establecen para el MVP inicial:
 
-1. The backend will use NestJS and TypeScript.
-2. The application will be a Modular Monolith.
-3. MySQL will be the primary database.
-4. TypeORM will be used for persistence.
-5. Domain logic must not depend on NestJS or TypeORM.
-6. Modules must maintain clear ownership of entities.
-7. Cross-module access to internal implementations is prohibited.
-8. Critical inventory operations must be transactional.
-9. Inventory must never become negative.
-10. Domain Events will be internal initially.
-11. Redis will not be required for the MVP.
-12. External message brokers will not be required for the MVP.
-13. AuditLog will be immutable.
-14. Authentication will use JWT.
-15. Authorization will use RBAC.
-16. REST will be the initial API style.
-17. API versioning will start with `/api/v1`.
-18. Automated testing is required for critical business operations.
-19. Business logic must not be implemented inside controllers.
-20. Infrastructure concerns must remain outside the Domain layer.
+- El backend utilizará NestJS y TypeScript.
+- El frontend utilizará React y TypeScript.
+- El backend utilizará una arquitectura de Modular Monolith.
+- MySQL será la base de datos principal.
+- TypeORM se utilizará para la persistencia.
+- La lógica de dominio no debe depender de NestJS ni de TypeORM.
+- Los módulos deben mantener una propiedad clara de las entidades.
+- El acceso entre módulos a las implementaciones internas está prohibido.
+- Las operaciones críticas de inventario deben ser transaccionales.
+- El inventario nunca debe volverse negativo.
+- Los eventos de dominio serán internos inicialmente.
+- Redis no será necesario para el MVP.
+- Los brokers de mensajes externos no serán necesarios para el MVP.
+- `AuditLog` será inmutable.
+- La autenticación utilizará JWT.
+- La autorización utilizará RBAC.
+- REST será el estilo inicial de la API.
+- El versionado de la API comenzará con `/api/v1`.
+- Se requieren pruebas automatizadas para las operaciones de negocio críticas.
+- La lógica de negocio no debe implementarse dentro de los controladores.
+- Las preocupaciones de infraestructura deben permanecer fuera de la capa de
+  dominio.
+- Los módulos deben comunicarse a través de contratos públicos definidos o de
+  eventos de dominio.
+- La funcionalidad compartida no debe contener lógica específica de negocio.
+- El frontend consumirá el backend a través de la API REST.
 
 ---
 
-# 38. Architecture Summary
+## 39. Resumen de la arquitectura
 
-StockFlow will use a Modular Monolith architecture that combines clear business module boundaries with Domain-Driven Design and Clean Architecture principles.
+StockFlow utilizará una arquitectura de Modular Monolith basada en NestJS.
+
+La aplicación se desplegará como una única unidad mientras mantiene límites de
+negocio claros a través de módulos independientes.
+
+Cada módulo puede contener:
+
+- Dominio.
+- Aplicación.
+- Infraestructura.
+
+Los módulos de negocio principales son:
+
+- Identity
+- Organizations
+- Catalog
+- Inventory
+- Transfers
+- Purchasing
+- Alerts
+- Audit
+- Reporting
+
+La arquitectura general es:
 
 ```text
                          STOCKFLOW
                              │
                     Modular Monolith
+                             │
+                    NestJS Application
                              │
        ┌─────────────────────┼─────────────────────┐
        │                     │                     │
@@ -1455,35 +1621,16 @@ StockFlow will use a Modular Monolith architecture that combines clear business 
                            MySQL
 ```
 
-The architecture prioritizes:
+La arquitectura prioriza:
 
-* Business correctness.
-* Maintainability.
-* Clear module ownership.
-* Testability.
-* Transactional consistency.
-* Future scalability.
-* Controlled complexity.
+- Corrección de negocio.
+- Mantenibilidad.
+- Propiedad clara de los módulos.
+- Capacidad de prueba.
+- Consistencia transaccional.
+- Acoplamiento controlado.
+- Escalabilidad futura.
+- Complejidad controlada.
 
-The system will evolve based on real requirements rather than introducing infrastructure complexity prematurely.
-
-## Modular Monolith
-
-StockFlow utiliza una arquitectura Modular Monolith basada en NestJS.
-
-La aplicación se despliega como una única unidad, pero el código está organizado
-en módulos independientes orientados al dominio.
-
-Los módulos encapsulan sus responsabilidades y exponen únicamente las
-interfaces necesarias para comunicarse con otros módulos.
-
-La arquitectura busca mantener bajo acoplamiento y alta cohesión entre
-los módulos.
-
-### Module Structure
-
-src/
-├── modules/
-├── common/
-├── config/
-└── database/
+El sistema evolucionará según los requisitos reales de negocio y técnicos en
+lugar de introducir complejidad de infraestructura prematuramente.
